@@ -37,5 +37,8 @@ in/
 # Temp dirs (best-effort cleanup; ignore if left behind)
 .dr-gen-tmp-*/
 
+# Release artifacts (tarballs, checksums)
+release/
+
 # Context
 CONTEXT.md
