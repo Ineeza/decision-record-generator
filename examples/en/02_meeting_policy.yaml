@@ -1,0 +1,9 @@
+title: "Limit recurring meetings to 30 minutes"
+date: "2026-01-01"
+decider: "Team Lead"
+context: "Meetings keep getting longer and reduce focus time"
+why: "To keep discussions focused and speed up decisions"
+rule: "Recurring meetings are 30 minutes by default. If more time is needed, reschedule with a clear purpose, expected decision, and next actions"
+alternatives: "60-minute default, no meetings, async-only"
+consequences: "Less rambling, but requires better preparation (agenda)"
+tags: ["team", "process"]

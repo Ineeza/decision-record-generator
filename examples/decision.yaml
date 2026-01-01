@@ -1,0 +1,9 @@
+title: "Use PostgreSQL for user data"
+date: "2024-01-15"
+decider: "Alice (PM)"
+context: "需要高速なクエリ"
+why: "スケーラビリティと信頼性"
+rule: "All user data uses PostgreSQL"
+alternatives: "MongoDB, DynamoDB"
+consequences: "Need DB expertise"
+tags: ["database", "infrastructure"]
