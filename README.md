@@ -1,8 +1,15 @@
-# decision-record-generator
-A lightweight generator for decision records,
-designed for fast-moving teams who need reproducible decisions.
+# decision-record-generator (dr-gen)
 
-（日本語）アジャイルチーム向けの軽量な意思決定記録（DR）ジェネレーターです。`decision.yaml` から Markdown / JSON を生成し、`manifest.json` の SHA256 ハッシュで改ざん検知できます。
+Generate lightweight Decision Records (DRs) from `decision.yaml`.
+Built for fast-moving teams who need a small, reproducible “evidence trail” of decisions (why/rule) for handoffs, audits, and security questionnaires.
+
+（日本語）引き継ぎ・監査対応・セキュリティに関する確認（質問対応）のために、意思決定（Why / Rule）を小さく・再現可能な形で残すDRジェネレーターです。`decision.yaml` から Markdown / JSON を生成し、`manifest.json` の SHA256 ハッシュで改ざん検知できます。
+
+**Outputs (4 files)**
+- `decision-record.md` (human-readable)
+- `summary.json` (structured data)
+- `repro.md` (reproducibility notes)
+- `manifest.json` (SHA256 hashes for tamper detection)
 
 ## Fastest try (npm)
 
@@ -56,13 +63,6 @@ dr-gen generate examples/ja/01_product_pricing_rule.yaml
 dr-gen generate examples/en/01_product_pricing_rule.yaml
 ```
 
-## Install (global)
-
-```bash
-npm install -g dr-gen
-dr-gen generate decision.yaml
-```
-
 ## Run with npx
 
 After publishing to npm, you can run without installing globally:
@@ -95,8 +95,10 @@ dr-gen generate decision.yaml --out-dir some-dir
 
 ### 日本語の入力について
 
-- `decision.yaml` の値は日本語OKです（UTF-8）。生成される `decision-record.md` などにもそのまま出力されます。
-- CLIのコマンド/ヘルプは英語のまま運用し、必要になったら日本語対応（i18n）を追加します。
+- `decision.yaml` は UTF-8 を想定しています。値（title / why など）は日本語でも問題ありません。
+	生成される `decision-record.md` / `summary.json` / `repro.md` にも、そのまま出力されます。
+- 現時点では CLI のコマンド名・ヘルプ表示は英語です（ドキュメントで補足しています）。
+	需要があれば日本語表示（i18n）も検討します。
 
 ## CLI
 
