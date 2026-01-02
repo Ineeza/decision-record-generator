@@ -32,6 +32,8 @@ function renderRecordMarkdown(record: DecisionRecord): string {
   const meta: string[] = [];
   if (record.date !== undefined && record.date.length > 0) meta.push(`**Date**: ${record.date}`);
   if (record.decider !== undefined && record.decider.length > 0) meta.push(`**Decider**: ${record.decider}`);
+  if (record.status !== undefined && record.status.length > 0) meta.push(`**Status**: ${record.status}`);
+  if (record.supersedes !== undefined && record.supersedes.length > 0) meta.push(`**Supersedes**: ${record.supersedes}`);
 
   if (meta.length > 0) {
     lines.push(meta.join('  \n'));
@@ -46,7 +48,7 @@ function renderRecordMarkdown(record: DecisionRecord): string {
   lines.push(record.why ?? '');
   lines.push('');
 
-  lines.push('## Rule');
+  lines.push('## Decision');
   lines.push(record.rule ?? '');
   lines.push('');
 
@@ -201,6 +203,8 @@ export async function generateDecisionRecordFiles(
       title: record.title,
       date: record.date,
       decider: record.decider,
+      status: record.status,
+      supersedes: record.supersedes,
       tags: record.tags,
       files: {
         record: OUTPUT_FILES.record,

@@ -31,4 +31,27 @@ describe('parseDecisionYaml', () => {
       await fs.rm(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('parses ADR-style lifecycle fields', async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dr-gen-test-'));
+    try {
+      const filePath = path.join(tmpDir, 'decision.yaml');
+      await fs.writeFile(
+        filePath,
+        [
+          'title: "Hello"',
+          'status: "accepted"',
+          'supersedes: "out/2025-12-31__Old__abcd1234"',
+          ''
+        ].join('\n'),
+        'utf8'
+      );
+
+      const record = await parseDecisionYaml(filePath);
+      expect(record.status).toBe('accepted');
+      expect(record.supersedes).toContain('Old');
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
 });

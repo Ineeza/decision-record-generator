@@ -39,6 +39,8 @@ export async function parseDecisionYaml(filePath: string): Promise<DecisionRecor
     title,
     date: asOptionalString(loaded.date),
     decider: asOptionalString(loaded.decider),
+    status: asOptionalString(loaded.status),
+    supersedes: asOptionalString(loaded.supersedes),
     context: asOptionalString(loaded.context),
     why: asOptionalString(loaded.why),
     rule: asOptionalString(loaded.rule),

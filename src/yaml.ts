@@ -7,6 +7,8 @@ export function renderDecisionYaml(record: DecisionRecord): string {
     title: record.title,
     date: record.date ?? '',
     decider: record.decider ?? '',
+    status: record.status ?? '',
+    supersedes: record.supersedes ?? '',
     context: record.context ?? '',
     why: record.why ?? '',
     rule: record.rule ?? '',

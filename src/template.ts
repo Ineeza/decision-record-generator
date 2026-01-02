@@ -3,6 +3,8 @@ export function decisionYamlTemplate(): string {
     'title: "TODO: Decision title"',
     'date: ""',
     'decider: ""',
+    'status: ""',
+    'supersedes: ""',
     'context: ""',
     'why: ""',
     'rule: ""',

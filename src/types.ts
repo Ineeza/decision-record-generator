@@ -2,6 +2,8 @@ export interface DecisionRecord {
   readonly title: string;
   readonly date?: string;
   readonly decider?: string;
+  readonly status?: string;
+  readonly supersedes?: string;
   readonly context?: string;
   readonly why?: string;
   readonly rule?: string;

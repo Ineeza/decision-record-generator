@@ -2,6 +2,7 @@ import readline from 'node:readline/promises';
 import process from 'node:process';
 
 import type { DecisionRecord } from './types.js';
+import type { SupportedLang } from './messages.js';
 import { newContextPrompt, newIntroLines, newRulePrompt, newTitlePrompt, newWhyPrompt } from './messages.js';
 
 function todayLocalIsoDate(): string {
@@ -12,10 +13,13 @@ function todayLocalIsoDate(): string {
   return `${year}-${month}-${day}`;
 }
 
-function requiredNonEmpty(label: string, value: string): string {
+function requiredNonEmpty(labelEn: string, labelJa: string, value: string, lang: SupportedLang): string {
   const trimmed = value.trim();
   if (trimmed.length === 0) {
-    throw new Error(`${label} is required (cannot be empty).`);
+    if (lang === 'ja') {
+      throw new Error(`${labelJa}は必須です（空欄不可）。`);
+    }
+    throw new Error(`${labelEn} is required (cannot be empty).`);
   }
   return trimmed;
 }
@@ -25,31 +29,37 @@ function optionalTrimmed(value: string): string | undefined {
   return trimmed.length === 0 ? undefined : trimmed;
 }
 
-export async function promptDecisionRecord(options: { readonly includeDate: boolean }): Promise<DecisionRecord> {
+export async function promptDecisionRecord(options: { readonly includeDate: boolean; readonly lang: SupportedLang }): Promise<DecisionRecord> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
     const todayIsoDate = todayLocalIsoDate();
-    for (const line of newIntroLines({ includeDate: options.includeDate, todayIsoDate })) {
+    for (const line of newIntroLines({ includeDate: options.includeDate, todayIsoDate }, options.lang)) {
       console.log(line);
     }
 
     const title = requiredNonEmpty(
       'Title',
-      await rl.question(newTitlePrompt())
+      'タイトル',
+      await rl.question(newTitlePrompt(options.lang)),
+      options.lang
     );
 
     const why = requiredNonEmpty(
       'Why',
-      await rl.question(newWhyPrompt())
+      'Why',
+      await rl.question(newWhyPrompt(options.lang)),
+      options.lang
     );
 
     const rule = requiredNonEmpty(
       'Rule',
-      await rl.question(newRulePrompt())
+      'Rule',
+      await rl.question(newRulePrompt(options.lang)),
+      options.lang
     );
 
     const context = optionalTrimmed(
-      await rl.question(newContextPrompt())
+      await rl.question(newContextPrompt(options.lang))
     );
 
     const date = options.includeDate ? todayIsoDate : undefined;

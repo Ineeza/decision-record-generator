@@ -12,13 +12,18 @@ import { decisionFolderName } from './naming.js';
 import { promptDecisionRecord } from './interactive.js';
 import { renderDecisionYaml } from './yaml.js';
 import { verifyOutDir } from './verify.js';
+import { areTitleAndRuleTooSimilar } from './text.js';
+import { listDecisions, renderListReportMarkdown } from './list.js';
 import {
   generatedOutputLines,
   missingCoreFieldsLines,
   signatureIgnoredLines,
+  skippedGenerateLines,
   templateCreatedLines,
+  titleRuleTooSimilarLines,
   wroteInputLines
 } from './messages.js';
+import type { SupportedLang } from './messages.js';
 
 function getToolVersion(): string | undefined {
   try {
@@ -28,6 +33,19 @@ function getToolVersion(): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function resolveLang(cliLangRaw: string | undefined): SupportedLang {
+  const cliLang = (cliLangRaw ?? '').trim().toLowerCase();
+  const envLang = (process.env.DR_GEN_LANG ?? '').trim().toLowerCase();
+
+  const candidate = cliLang.length > 0 ? cliLang : envLang;
+  if (candidate === 'ja' || candidate === 'jp' || candidate === 'japanese') return 'ja';
+  if (candidate === 'en' || candidate === 'english') return 'en';
+
+  const locale = `${process.env.LC_ALL ?? ''} ${process.env.LC_MESSAGES ?? ''} ${process.env.LANG ?? ''}`.toLowerCase();
+  if (locale.includes('ja')) return 'ja';
+  return 'en';
 }
 
 async function fileExists(filePath: string): Promise<boolean> {
@@ -90,6 +108,27 @@ function warnIfMissingCoreFields(record: { why?: string; rule?: string }, inputP
   }
 }
 
+function warnIfTitleRuleTooSimilar(record: { title: string; rule?: string }, lang: SupportedLang): void {
+  const rule = record.rule ?? '';
+  if (areTitleAndRuleTooSimilar(record.title, rule)) {
+    for (const line of titleRuleTooSimilarLines(lang)) {
+      console.warn(line);
+    }
+  }
+}
+
+function parsePositiveIntOrThrow(value: string, label: string): number {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    throw new Error(`${label} must be a positive integer.`);
+  }
+  const n = Number.parseInt(trimmed, 10);
+  if (!Number.isFinite(n) || Number.isNaN(n) || n <= 0) {
+    throw new Error(`${label} must be a positive integer (got: ${value}).`);
+  }
+  return n;
+}
+
 async function main(argv: readonly string[]): Promise<void> {
   const program = new Command();
 
@@ -125,6 +164,7 @@ async function main(argv: readonly string[]): Promise<void> {
 
       const record = await parseDecisionYaml(input);
       warnIfMissingCoreFields(record, input);
+      warnIfTitleRuleTooSimilar(record, resolveLang(undefined));
 
       const baseOutDir = options.outDir;
       const folder = decisionFolderName(record);
@@ -155,10 +195,14 @@ async function main(argv: readonly string[]): Promise<void> {
     .option('--in-dir <dir>', 'Base directory for inputs', 'in')
     .option('-p, --path <file>', 'Where to write decision.yaml (overrides --in-dir)', '')
     .option('-o, --out-dir <dir>', 'Output directory (created if missing)', 'out')
+    .option('--lang <lang>', 'Language for prompts (en|ja). Also supports DR_GEN_LANG env var.', '')
     .option('--no-date', 'Do not auto-fill date')
+    .option('--skip-generate', 'Only write decision.yaml and do not generate output files', false)
     .option('--force', 'Overwrite decision.yaml if it already exists', false)
-    .action(async (options: { inDir: string; path: string; outDir: string; force: boolean; date: boolean }) => {
-      const record = await promptDecisionRecord({ includeDate: options.date });
+    .action(async (options: { inDir: string; path: string; outDir: string; force: boolean; date: boolean; lang: string; skipGenerate: boolean }) => {
+      const lang = resolveLang(options.lang);
+      const record = await promptDecisionRecord({ includeDate: options.date, lang });
+      warnIfTitleRuleTooSimilar(record, lang);
 
       const desiredFolder = decisionFolderName(record);
       const decisionDirName = await findAvailableDecisionDirName(options.inDir, options.outDir, desiredFolder);
@@ -173,6 +217,13 @@ async function main(argv: readonly string[]): Promise<void> {
       await fs.writeFile(yamlPath, renderDecisionYaml(record), 'utf8');
       for (const line of wroteInputLines(yamlPath)) {
         console.log(line);
+      }
+
+      if (options.skipGenerate) {
+        for (const line of skippedGenerateLines(yamlPath, options.outDir, lang)) {
+          console.log(line);
+        }
+        return;
       }
 
       const finalOutDir = path.join(options.outDir, decisionDirName);
@@ -216,6 +267,29 @@ async function main(argv: readonly string[]): Promise<void> {
         console.error(`- ${r.filename}: hash/size mismatch`);
       }
       process.exitCode = 2;
+    });
+
+  program
+    .command('list')
+    .description('List generated decision records and print a copy-pasteable report')
+    .option('-o, --out-dir <dir>', 'Base output directory to scan', 'out')
+    .option('--from <YYYY-MM-DD>', 'Start date (inclusive) based on folder name prefix', '')
+    .option('--to <YYYY-MM-DD>', 'End date (inclusive) based on folder name prefix', '')
+    .option('--max-decision-len <n>', 'Max characters for the Decision line in the report (default: 80)', '80')
+    .action(async (options: { outDir: string; from: string; to: string; maxDecisionLen: string }) => {
+      const from = options.from.trim().length > 0 ? options.from.trim() : undefined;
+      const to = options.to.trim().length > 0 ? options.to.trim() : undefined;
+      const maxDecisionLen = parsePositiveIntOrThrow(options.maxDecisionLen, '--max-decision-len');
+
+      const items = await listDecisions({ outDir: options.outDir, from, to });
+      const report = renderListReportMarkdown(items, {
+        outDir: options.outDir,
+        from,
+        to,
+        generatedAtIso: new Date().toISOString(),
+        maxDecisionLen
+      });
+      console.log(report);
     });
 
   await program.parseAsync(argv as string[]);
