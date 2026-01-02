@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import fs from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { parseDecisionYaml } from './parser.js';
@@ -10,6 +11,7 @@ import { decisionYamlTemplate } from './template.js';
 import { decisionFolderName } from './naming.js';
 import { promptDecisionRecord } from './interactive.js';
 import { renderDecisionYaml } from './yaml.js';
+import { verifyOutDir } from './verify.js';
 import {
   generatedOutputLines,
   missingCoreFieldsLines,
@@ -17,6 +19,16 @@ import {
   templateCreatedLines,
   wroteInputLines
 } from './messages.js';
+
+function getToolVersion(): string | undefined {
+  try {
+    const require = createRequire(import.meta.url);
+    const pkg = require('../package.json') as { version?: unknown };
+    return typeof pkg.version === 'string' ? pkg.version : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 async function fileExists(filePath: string): Promise<boolean> {
   try {
@@ -81,10 +93,12 @@ function warnIfMissingCoreFields(record: { why?: string; rule?: string }, inputP
 async function main(argv: readonly string[]): Promise<void> {
   const program = new Command();
 
+  const toolVersion = getToolVersion();
+
   program
     .name('dr-gen')
     .description('Generate lightweight Decision Records from decision.yaml')
-    .version('0.1.0');
+    .version(toolVersion ?? '0.0.0');
 
   program
     .command('generate')
@@ -116,7 +130,20 @@ async function main(argv: readonly string[]): Promise<void> {
       const folder = decisionFolderName(record);
       const finalOutDir = await findAvailableDirPath(baseOutDir, folder);
 
-      await generateDecisionRecordFiles(record, { outDir: finalOutDir });
+      const command = `dr-gen generate ${input} --out-dir ${baseOutDir}`;
+      await generateDecisionRecordFiles(record, {
+        outDir: finalOutDir,
+        meta: {
+          inputPath: input,
+          baseOutDir,
+          outputDir: finalOutDir,
+          command,
+          toolName: 'dr-gen',
+          toolVersion,
+          nodeVersion: process.version,
+          platform: process.platform
+        }
+      });
       for (const line of generatedOutputLines(finalOutDir)) {
         console.log(line);
       }
@@ -149,10 +176,46 @@ async function main(argv: readonly string[]): Promise<void> {
       }
 
       const finalOutDir = path.join(options.outDir, decisionDirName);
-      await generateDecisionRecordFiles(record, { outDir: finalOutDir });
+      const command = `dr-gen new${options.date ? '' : ' --no-date'} --in-dir ${options.inDir} --out-dir ${options.outDir}`;
+      await generateDecisionRecordFiles(record, {
+        outDir: finalOutDir,
+        meta: {
+          inputPath: yamlPath,
+          baseOutDir: options.outDir,
+          outputDir: finalOutDir,
+          command,
+          toolName: 'dr-gen',
+          toolVersion,
+          nodeVersion: process.version,
+          platform: process.platform
+        }
+      });
       for (const line of generatedOutputLines(finalOutDir)) {
         console.log(line);
       }
+    });
+
+  program
+    .command('verify')
+    .description('Verify output integrity using manifest.json (tamper detection)')
+    .argument('[dir]', 'Output directory containing manifest.json', '.')
+    .action(async (dir: string) => {
+      const result = await verifyOutDir(dir);
+      if (result.ok) {
+        console.log('OK: all files match manifest.json');
+        return;
+      }
+
+      console.error('FAILED: one or more files do not match manifest.json');
+      for (const r of result.results) {
+        if (r.ok) continue;
+        if (r.error !== undefined) {
+          console.error(`- ${r.filename}: ${r.error}`);
+          continue;
+        }
+        console.error(`- ${r.filename}: hash/size mismatch`);
+      }
+      process.exitCode = 2;
     });
 
   await program.parseAsync(argv as string[]);

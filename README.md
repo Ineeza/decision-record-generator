@@ -11,6 +11,11 @@ Built for fast-moving teams who need a small, reproducible “evidence trail” 
 - `repro.md` (reproducibility notes)
 - `manifest.json` (SHA256 hashes for tamper detection)
 
+## Operations (Drive / Box)
+
+If you store DRs in Drive / Box (common for non-developers), see:
+- [DRIVE_BOX_OPERATION_GUIDE.md](DRIVE_BOX_OPERATION_GUIDE.md)
+
 ## Fastest try (npm)
 
 ```bash

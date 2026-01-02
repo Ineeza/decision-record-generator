@@ -11,6 +11,18 @@ const OUTPUT_FILES = {
   manifest: 'manifest.json'
 } as const;
 
+interface ReproMeta {
+  readonly generatedAtIso: string;
+  readonly inputPath?: string;
+  readonly outputDir?: string;
+  readonly baseOutDir?: string;
+  readonly command?: string;
+  readonly toolName?: string;
+  readonly toolVersion?: string;
+  readonly nodeVersion?: string;
+  readonly platform?: string;
+}
+
 function renderRecordMarkdown(record: DecisionRecord): string {
   const lines: string[] = [];
 
@@ -54,40 +66,76 @@ function renderRecordMarkdown(record: DecisionRecord): string {
   return lines.join('\n');
 }
 
-function renderReproMarkdown(record: DecisionRecord): string {
+function renderReproMarkdown(record: DecisionRecord, meta: ReproMeta): string {
   const lines: string[] = [];
   lines.push('# Reproducibility Notes');
   lines.push('');
-  lines.push('## Decision');
-  lines.push(record.title);
+
+  lines.push('This file is meant to be operational: how to regenerate outputs and how to verify integrity.');
+  lines.push('The human-readable decision is in `decision-record.md`.');
   lines.push('');
 
-  lines.push('## Context');
-  lines.push(record.context ?? '');
-  lines.push('');
-
-  lines.push('## How to Reproduce This Decision');
-  lines.push('1. Review the context and constraints');
-  if ((record.alternatives ?? '').trim().length > 0) {
-    lines.push(`2. Evaluate alternatives: ${record.alternatives}`);
-  } else {
-    lines.push('2. Evaluate alternatives');
+  lines.push('## Summary');
+  lines.push(`- Decision: ${record.title}`);
+  lines.push(`- Generated at: ${meta.generatedAtIso}`);
+  if (meta.toolName !== undefined) {
+    const versionPart = meta.toolVersion !== undefined ? ` ${meta.toolVersion}` : '';
+    lines.push(`- Generator: ${meta.toolName}${versionPart}`);
   }
-  if ((record.consequences ?? '').trim().length > 0) {
-    lines.push(`3. Consider consequences: ${record.consequences}`);
-  } else {
-    lines.push('3. Consider consequences');
+  if (meta.nodeVersion !== undefined) {
+    lines.push(`- Node.js: ${meta.nodeVersion}`);
   }
-  if ((record.rule ?? '').trim().length > 0) {
-    lines.push(`4. Apply the rule: ${record.rule}`);
-  } else {
-    lines.push('4. Apply the rule');
+  if (meta.platform !== undefined) {
+    lines.push(`- Platform: ${meta.platform}`);
+  }
+  if (meta.inputPath !== undefined && meta.inputPath.trim().length > 0) {
+    lines.push(`- Input: ${meta.inputPath}`);
+  }
+  if (meta.outputDir !== undefined && meta.outputDir.trim().length > 0) {
+    lines.push(`- Output dir: ${meta.outputDir}`);
   }
   lines.push('');
 
-  lines.push('## Verification');
-  lines.push('- Check manifest.json for file integrity');
-  lines.push('- Compare SHA256 hashes to detect tampering');
+  lines.push('## Regenerate');
+  lines.push('Re-run the generator from the same repo/project with the same `decision.yaml`.');
+  lines.push('');
+  if (meta.command !== undefined && meta.command.trim().length > 0) {
+    lines.push('Command used:');
+    lines.push('```bash');
+    lines.push(meta.command);
+    lines.push('```');
+  } else {
+    const baseOutDir = meta.baseOutDir?.trim().length ? meta.baseOutDir : 'out';
+    lines.push('Example:');
+    lines.push('```bash');
+    lines.push(`dr-gen generate <path/to/decision.yaml> --out-dir ${baseOutDir}`);
+    lines.push('```');
+  }
+  lines.push('');
+  lines.push('Notes:');
+  lines.push('- By design, `dr-gen` avoids overwriting existing output folders. If you run it twice, it may create a suffixed folder like `__2`.');
+  lines.push('- If you need a byte-for-byte identical result, regenerate into an empty folder and compare hashes.');
+  lines.push('');
+
+  lines.push('## Verify integrity (tamper detection)');
+  lines.push('The source of truth is `manifest.json` (SHA256 per file).');
+  lines.push('');
+  lines.push('1) Open `manifest.json` and find the expected hashes under `files`.');
+  lines.push('');
+  lines.push('2) Compute hashes locally and compare:');
+  lines.push('```bash');
+  lines.push('shasum -a 256 decision-record.md');
+  lines.push('shasum -a 256 summary.json');
+  lines.push('shasum -a 256 repro.md');
+  lines.push('```');
+  lines.push('');
+  lines.push('If any hash differs, at least one file was modified after generation (or a different generator version produced different output).');
+  lines.push('');
+
+  lines.push('## Quick review checklist (optional)');
+  lines.push('- Does the decision still match reality? If not, write a new DR (do not edit history).');
+  lines.push('- Are `why` and `rule` still the best short explanation?');
+  lines.push('- If an exception happened, create a separate DR for the exception.');
   lines.push('');
 
   return lines.join('\n');
@@ -129,6 +177,16 @@ async function ensureDirectoryExists(dirPath: string): Promise<void> {
 
 export interface GenerateOptions {
   readonly outDir?: string;
+  readonly meta?: {
+    readonly inputPath?: string;
+    readonly outputDir?: string;
+    readonly baseOutDir?: string;
+    readonly command?: string;
+    readonly toolName?: string;
+    readonly toolVersion?: string;
+    readonly nodeVersion?: string;
+    readonly platform?: string;
+  };
 }
 
 export async function generateDecisionRecordFiles(
@@ -155,9 +213,19 @@ export async function generateDecisionRecordFiles(
     2
   );
 
-  const reproMd = renderReproMarkdown(record);
-
   const generatedAt = new Date().toISOString();
+  const reproMd = renderReproMarkdown(record, {
+    generatedAtIso: generatedAt,
+    inputPath: options.meta?.inputPath,
+    outputDir: options.meta?.outputDir,
+    baseOutDir: options.meta?.baseOutDir,
+    command: options.meta?.command,
+    toolName: options.meta?.toolName,
+    toolVersion: options.meta?.toolVersion,
+    nodeVersion: options.meta?.nodeVersion,
+    platform: options.meta?.platform
+  });
+
   const manifest = buildManifest(record.title, generatedAt, {
     [OUTPUT_FILES.record]: recordMd,
     [OUTPUT_FILES.summary]: summaryJson,
