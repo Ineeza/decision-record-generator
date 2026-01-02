@@ -275,11 +275,13 @@ async function main(argv: readonly string[]): Promise<void> {
     .option('-o, --out-dir <dir>', 'Base output directory to scan', 'out')
     .option('--from <YYYY-MM-DD>', 'Start date (inclusive) based on folder name prefix', '')
     .option('--to <YYYY-MM-DD>', 'End date (inclusive) based on folder name prefix', '')
+    .option('--lang <lang>', 'Language for report labels (en|ja). Also supports DR_GEN_LANG env var.', '')
     .option('--max-decision-len <n>', 'Max characters for the Decision line in the report (default: 80)', '80')
-    .action(async (options: { outDir: string; from: string; to: string; maxDecisionLen: string }) => {
+    .action(async (options: { outDir: string; from: string; to: string; lang: string; maxDecisionLen: string }) => {
       const from = options.from.trim().length > 0 ? options.from.trim() : undefined;
       const to = options.to.trim().length > 0 ? options.to.trim() : undefined;
       const maxDecisionLen = parsePositiveIntOrThrow(options.maxDecisionLen, '--max-decision-len');
+      const lang = resolveLang(options.lang);
 
       const items = await listDecisions({ outDir: options.outDir, from, to });
       const report = renderListReportMarkdown(items, {
@@ -287,7 +289,8 @@ async function main(argv: readonly string[]): Promise<void> {
         from,
         to,
         generatedAtIso: new Date().toISOString(),
-        maxDecisionLen
+        maxDecisionLen,
+        lang
       });
       console.log(report);
     });

@@ -1,8 +1,8 @@
 {
   "name": "dr-gen",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Generate lightweight Decision Records from decision.yaml",
-  "homepage": "https://github.com/Ineeza/decision-record-generator#readme",
+  "homepage": "https://www.ineeza.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ineeza/decision-record-generator.git"

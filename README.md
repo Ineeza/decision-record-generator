@@ -1,7 +1,7 @@
 # decision-record-generator (dr-gen)
 
 Generate lightweight Decision Records (DRs) from `decision.yaml`.
-Built for fast-moving teams who need a small, reproducible “evidence trail” of decisions (why/rule) for handoffs, audits, and security questionnaires.
+Built for fast-moving teams who need a small, reproducible “evidence trail” of decisions (why/decision) for handoffs, audits, and security questionnaires.
 
 日本語は下の「Japanese (日本語)」セクションにまとめています。
 
@@ -85,7 +85,7 @@ dr-gen new --lang ja
 
 You can also set `DR_GEN_LANG=ja`.
 
-This asks for the minimum useful info (Title + Why + Rule). Other fields are optional.
+This asks for the minimum useful info (Title + Why + Decision). Other fields are optional.
 By default, `date` is set to today's date (YYYY-MM-DD). To disable this:
 
 ```bash
@@ -171,6 +171,9 @@ dr-gen new
 dr-gen verify out/<date>__<title>__<id>/
 dr-gen list --from 2026-01-01 --to 2026-01-31
 
+# Japanese report labels
+dr-gen list --from 2026-01-01 --to 2026-01-31 --lang ja
+
 # Optional: keep the Decision line on one terminal line
 dr-gen list --from 2026-01-01 --to 2026-01-31 --max-decision-len 60
 ```
@@ -179,7 +182,7 @@ dr-gen list --from 2026-01-01 --to 2026-01-31 --max-decision-len 60
 
 ## Japanese (日本語)
 
-引き継ぎ・監査対応・セキュリティに関する確認（質問対応）のために、意思決定（Why / Rule）を小さく・再現可能な形で残すDRジェネレーターです。`decision.yaml` から Markdown / JSON を生成し、`manifest.json` の SHA256 ハッシュで改ざん検知できます。
+引き継ぎ・監査対応・セキュリティに関する確認（質問対応）のために、意思決定（Why / Decision）を小さく・再現可能な形で残すDRジェネレーターです。`decision.yaml` から Markdown / JSON を生成し、`manifest.json` の SHA256 ハッシュで改ざん検知できます。
 
 ### 最速で試す（npm）
 
@@ -204,7 +207,7 @@ dr-gen new --lang ja
 
 環境変数で指定することもできます（例: `DR_GEN_LANG=ja`）。
 
-Title / Why / Rule を中心に入力します（他は任意）。`--no-date` で日付自動入力を無効にできます。
+Title / Why / Decision を中心に入力します（他は任意）。`--no-date` で日付自動入力を無効にできます。
 
 `status` / `alternatives` などを追記してから生成したい場合は、まず `decision.yaml` だけ作るのがおすすめです。
 
@@ -228,6 +231,9 @@ npx dr-gen@latest verify out/<date>__<title>__<id>/
 
 ```bash
 dr-gen list --from 2026-01-01 --to 2026-01-31
+
+# レポート文言を日本語にする
+dr-gen list --from 2026-01-01 --to 2026-01-31 --lang ja
 
 # 任意: Decision 行の文字数上限（デフォルト: 80）
 dr-gen list --from 2026-01-01 --to 2026-01-31 --max-decision-len 60

@@ -10,6 +10,19 @@ async function mkdirp(p: string): Promise<void> {
   await fs.mkdir(p, { recursive: true });
 }
 
+function findDecisionValue(report: string): string | undefined {
+  const line = report
+    .split(/\r?\n/)
+    .find((l) =>
+      l.trimStart().startsWith('- Decision: ') ||
+      l.trimStart().startsWith('- 決定事項: ')
+    );
+  if (line === undefined) return undefined;
+  return line.includes('- Decision: ')
+    ? (line.split('- Decision: ')[1] ?? '')
+    : (line.split('- 決定事項: ')[1] ?? '');
+}
+
 describe('listDecisions', () => {
   it('filters by date range using folder prefix and sorts newest first', async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dr-gen-list-test-'));
@@ -60,7 +73,6 @@ describe('listDecisions', () => {
       expect(report).toContain('2026-01-02');
       expect(report).not.toContain('2026-01-01');
 
-      // Each item should include folder name.
       // Decision is clipped to keep one-line output.
       expect(report).toMatch(/Decision: .*…/);
       expect(report).not.toContain('Folder:');
@@ -79,7 +91,6 @@ describe('listDecisions', () => {
       await mkdirp(a);
 
       await fs.writeFile(path.join(a, 'summary.json'), JSON.stringify({ title: 'A', date: '2026-01-02' }), 'utf8');
-
       const longDecision = 'Default to AWS for new production. '.repeat(10).trim();
       const recordMd = ['# Any', '', '## Decision', longDecision, ''].join('\n');
       await fs.writeFile(path.join(a, 'decision-record.md'), recordMd, 'utf8');
@@ -93,14 +104,40 @@ describe('listDecisions', () => {
         maxDecisionLen: 10
       });
 
-      const decisionLine = report
-        .split(/\r?\n/)
-        .find((l) => l.trimStart().startsWith('- Decision: '));
+      const value = findDecisionValue(report);
+      expect(value).toBeDefined();
+      const v = value ?? '';
 
-      expect(decisionLine).toBeDefined();
-      const value = (decisionLine ?? '').split('- Decision: ')[1] ?? '';
-      expect(value.endsWith('…')).toBe(true);
-      expect([...value].length).toBeLessThanOrEqual(10);
+      expect(v.endsWith('…')).toBe(true);
+      expect([...v].length).toBeLessThanOrEqual(10);
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('renders Japanese report labels when lang=ja', async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dr-gen-list-test-'));
+    try {
+      const outDir = path.join(tmpDir, 'out');
+      await mkdirp(outDir);
+
+      const a = path.join(outDir, '2026-01-02__A__aaaa');
+      await mkdirp(a);
+      await fs.writeFile(path.join(a, 'summary.json'), JSON.stringify({ title: 'A', date: '2026-01-02' }), 'utf8');
+      await fs.writeFile(path.join(a, 'decision-record.md'), ['# Any', '', '## Decision', '短い決定', ''].join('\n'), 'utf8');
+
+      const items = await listDecisions({ outDir, from: '2026-01-02', to: '2026-01-02' });
+      const report = renderListReportMarkdown(items, {
+        outDir,
+        from: '2026-01-02',
+        to: '2026-01-02',
+        generatedAtIso: '2026-01-02T00:00:00.000Z',
+        lang: 'ja'
+      });
+
+      expect(report).toContain('# 意思決定レポート');
+      expect(report).toContain('## 一覧');
+      expect(report).toContain('- 決定事項:');
     } finally {
       await fs.rm(tmpDir, { recursive: true, force: true });
     }

@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import type { SupportedLang } from './messages.js';
+
 interface DecisionSummary {
   readonly title?: string;
   readonly date?: string;
@@ -182,6 +184,59 @@ function extractFolderId(folderName: string): string {
   return /^[0-9a-f]{8}$/i.test(last) ? last : folderName;
 }
 
+function listLabels(lang: SupportedLang): {
+  readonly reportTitle: string;
+  readonly outDir: string;
+  readonly period: string;
+  readonly generatedAt: string;
+  readonly decisionsSection: string;
+  readonly periodAll: string;
+  readonly periodFrom: (from: string) => string;
+  readonly periodTo: (to: string) => string;
+  readonly id: string;
+  readonly date: string;
+  readonly title: string;
+  readonly status: string;
+  readonly decider: string;
+  readonly decision: string;
+} {
+  if (lang === 'ja') {
+    return {
+      reportTitle: '# 意思決定レポート',
+      outDir: '- 出力ディレクトリ',
+      period: '- 期間',
+      generatedAt: '- 生成日時',
+      decisionsSection: '## 一覧',
+      periodAll: '全て',
+      periodFrom: (from: string) => `開始 ${from}`,
+      periodTo: (to: string) => `終了 ${to}`,
+      id: 'ID',
+      date: '日付',
+      title: 'タイトル',
+      status: 'ステータス',
+      decider: '決定者',
+      decision: '決定事項'
+    };
+  }
+
+  return {
+    reportTitle: '# Decision Record Report',
+    outDir: '- Out dir',
+    period: '- Period',
+    generatedAt: '- Generated at',
+    decisionsSection: '## Decisions',
+    periodAll: 'all',
+    periodFrom: (from: string) => `from ${from}`,
+    periodTo: (to: string) => `to ${to}`,
+    id: 'ID',
+    date: 'Date',
+    title: 'Title',
+    status: 'Status',
+    decider: 'Decider',
+    decision: 'Decision'
+  };
+}
+
 export function renderListReportMarkdown(
   items: readonly ListedDecision[],
   options: {
@@ -190,26 +245,29 @@ export function renderListReportMarkdown(
     readonly outDir: string;
     readonly generatedAtIso: string;
     readonly maxDecisionLen?: number;
+    readonly lang?: SupportedLang;
   }
 ): string {
   const lines: string[] = [];
 
   const maxDecisionLen = options.maxDecisionLen ?? 80;
+  const lang = options.lang ?? 'en';
+  const labels = listLabels(lang);
 
-  lines.push('# Decision Record Report');
+  lines.push(labels.reportTitle);
   lines.push('');
 
   const periodParts: string[] = [];
-  if (options.from !== undefined && options.from.trim().length > 0) periodParts.push(`from ${options.from}`);
-  if (options.to !== undefined && options.to.trim().length > 0) periodParts.push(`to ${options.to}`);
-  const period = periodParts.length > 0 ? periodParts.join(' ') : 'all';
+  if (options.from !== undefined && options.from.trim().length > 0) periodParts.push(labels.periodFrom(options.from));
+  if (options.to !== undefined && options.to.trim().length > 0) periodParts.push(labels.periodTo(options.to));
+  const period = periodParts.length > 0 ? periodParts.join(' ') : labels.periodAll;
 
-  lines.push(`- Out dir: ${options.outDir}`);
-  lines.push(`- Period: ${period}`);
-  lines.push(`- Generated at: ${options.generatedAtIso}`);
+  lines.push(`${labels.outDir}: ${options.outDir}`);
+  lines.push(`${labels.period}: ${period}`);
+  lines.push(`${labels.generatedAt}: ${options.generatedAtIso}`);
   lines.push('');
 
-  lines.push('## Decisions');
+  lines.push(labels.decisionsSection);
   lines.push('');
 
   for (const item of items) {
@@ -220,14 +278,14 @@ export function renderListReportMarkdown(
     const decider = item.summary?.decider ?? '';
     const rule = item.ruleExcerpt ?? '';
 
-    lines.push(`- ID: ${mdEscape(id)}`);
-    if (date.length > 0) lines.push(`  - Date: ${mdEscape(date)}`);
-    if (title.length > 0) lines.push(`  - Title: ${mdEscape(title)}`);
-    if (status.length > 0) lines.push(`  - Status: ${mdEscape(status)}`);
-    if (decider.length > 0) lines.push(`  - Decider: ${mdEscape(decider)}`);
+    lines.push(`- ${labels.id}: ${mdEscape(id)}`);
+    if (date.length > 0) lines.push(`  - ${labels.date}: ${mdEscape(date)}`);
+    if (title.length > 0) lines.push(`  - ${labels.title}: ${mdEscape(title)}`);
+    if (status.length > 0) lines.push(`  - ${labels.status}: ${mdEscape(status)}`);
+    if (decider.length > 0) lines.push(`  - ${labels.decider}: ${mdEscape(decider)}`);
     if (rule.length > 0) {
       const clipped = truncateOneLine(rule, maxDecisionLen);
-      lines.push(`  - Decision: ${mdEscape(clipped)}`);
+      lines.push(`  - ${labels.decision}: ${mdEscape(clipped)}`);
     }
 
     // Add a blank line between entries for readability and safer copy/paste.
