@@ -105,3 +105,18 @@ dr-gen generate decision.yaml --out-dir some-dir
 ```bash
 dr-gen generate decision.yaml
 ```
+
+## ライセンスについて
+
+本ソフトウェアは MIT License のもとで
+OSS として無料で提供しています。
+
+個人・法人を問わず利用可能です。
+
+組織・チームでの利用において、
+サポート、利用条件の明確化、
+継続的な提供が必要な場合は、
+法人契約をご検討ください。
+
+法人契約はこちら:
+https://www.ineeza.com/
