@@ -4,6 +4,7 @@
 - `02_meeting_policy.yaml` - Team process decision
 - `03_security_passwords.yaml` - Security decision
 - `04_customer_support_sla.yaml` - Support/SLA decision
+- `05_cloud_provider_selection.yaml` - Cloud provider decision (AWS / Azure)
 
 Try:
 
