@@ -186,6 +186,30 @@ dr-gen list --from 2026-01-01 --to 2026-01-31 --lang ja
 dr-gen list --from 2026-01-01 --to 2026-01-31 --max-decision-len 60
 ```
 
+`list` prints a copy/paste-friendly Markdown report to stdout. Example:
+
+```markdown
+# Decision Record Report
+
+- Out dir: out
+- Period: from 2026-01-01 to 2026-01-31
+- Generated at: 2026-01-03T09:00:00.000Z
+
+## Decisions
+
+- ID: 4a8c2f10
+  - Date: 2026-01-02
+  - Title: Use PostgreSQL for user data
+  - Status: accepted
+  - Decider: Alice (PM)
+  - Decision: All user data uses PostgreSQL
+
+- ID: 9b12d3ef
+  - Date: 2026-01-10
+  - Title: Customer support first reply time
+  - Decision: On business days, send a first reply within 24 hours (ack + next step)…
+```
+
 ---
 
 ## Japanese (日本語)
@@ -245,6 +269,30 @@ dr-gen list --from 2026-01-01 --to 2026-01-31 --lang ja
 
 # 任意: Decision 行の文字数上限（デフォルト: 80）
 dr-gen list --from 2026-01-01 --to 2026-01-31 --max-decision-len 60
+```
+
+出力例（標準出力にMarkdownを出します）:
+
+```markdown
+# 意思決定レポート
+
+- 出力ディレクトリ: out
+- 期間: 開始 2026-01-01 終了 2026-01-31
+- 生成日時: 2026-01-03T09:00:00.000Z
+
+## 一覧
+
+- ID: 4a8c2f10
+	- 日付: 2026-01-02
+	- タイトル: ユーザーデータはPostgreSQLを使う
+	- ステータス: accepted
+	- 決定者: Alice (PM)
+	- 決定事項: ユーザーデータはPostgreSQLで管理する
+
+- ID: 9b12d3ef
+	- 日付: 2026-01-10
+	- タイトル: 問い合わせの初回返信時間
+	- 決定事項: 平日は24時間以内に「受付＋次の見通し」を返信する…
 ```
 
 ### Drive / Box 運用
