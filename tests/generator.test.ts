@@ -15,7 +15,7 @@ describe('generateDecisionRecordFiles', () => {
           title: 'Test Decision',
           context: 'ctx',
           why: 'why',
-          rule: 'rule'
+          decision: 'decision'
         },
         { outDir: tmpDir }
       );
@@ -47,7 +47,7 @@ describe('generateDecisionRecordFiles', () => {
           status: 'accepted',
           supersedes: 'out/2025-12-31__Old__abcd1234',
           why: 'why',
-          rule: 'rule'
+          decision: 'decision'
         },
         { outDir: tmpDir }
       );

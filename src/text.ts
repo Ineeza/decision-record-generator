@@ -8,9 +8,9 @@ export function normalizeComparable(value: string): string {
     .replace(/["'`“”‘’.,:;!?()\[\]{}<>|\\/\-_=+*~^$#@]+/g, '');
 }
 
-export function areTitleAndRuleTooSimilar(title: string, rule: string): boolean {
+export function areTitleAndDecisionTooSimilar(title: string, decision: string): boolean {
   const t = normalizeComparable(title);
-  const r = normalizeComparable(rule);
+  const r = normalizeComparable(decision);
 
   if (t.length === 0 || r.length === 0) return false;
   if (t === r) return true;

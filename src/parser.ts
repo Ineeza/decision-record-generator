@@ -43,6 +43,8 @@ export async function parseDecisionYaml(filePath: string): Promise<DecisionRecor
     supersedes: asOptionalString(loaded.supersedes),
     context: asOptionalString(loaded.context),
     why: asOptionalString(loaded.why),
+    decision: asOptionalString((loaded as Record<string, unknown>).decision) ?? asOptionalString(loaded.rule),
+    // Keep legacy field in the in-memory model for compatibility with older code paths.
     rule: asOptionalString(loaded.rule),
     alternatives: asOptionalString(loaded.alternatives),
     consequences: asOptionalString(loaded.consequences),

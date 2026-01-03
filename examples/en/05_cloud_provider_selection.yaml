@@ -13,7 +13,7 @@ why: |
   We prioritize speed-to-production and operational reliability.
   AWS matches the team's existing experience, which reduces setup time and risk.
   It also has well-known best practices and common reference material for security and audit discussions.
-rule: |
+decision: |
   Default to AWS for new production environments.
   If an exception is needed (customer requirements, data residency/regulation, cost structure, etc.), create a separate DR to decide.
 alternatives: |

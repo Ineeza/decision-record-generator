@@ -3,7 +3,7 @@ date: "2026-01-01"
 decider: "Customer Support Lead"
 context: "We are receiving more feedback about slow replies"
 why: "To maintain trust and reduce churn risk"
-rule: "On business days, reply within 24 hours with an acknowledgement and the expected next step / timeline"
+decision: "On business days, reply within 24 hours with an acknowledgement and the expected next step / timeline"
 alternatives: "48 hours, immediate response, no SLA"
 consequences: "Requires staffing and an urgency triage rule"
 tags: ["support", "sla"]

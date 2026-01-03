@@ -49,7 +49,7 @@ function renderRecordMarkdown(record: DecisionRecord): string {
   lines.push('');
 
   lines.push('## Decision');
-  lines.push(record.rule ?? '');
+  lines.push(record.decision ?? record.rule ?? '');
   lines.push('');
 
   lines.push('## Alternatives Considered');
@@ -136,7 +136,7 @@ function renderReproMarkdown(record: DecisionRecord, meta: ReproMeta): string {
 
   lines.push('## Quick review checklist (optional)');
   lines.push('- Does the decision still match reality? If not, write a new DR (do not edit history).');
-  lines.push('- Are `why` and `rule` still the best short explanation?');
+  lines.push('- Are `why` and `decision` still the best short explanation?');
   lines.push('- If an exception happened, create a separate DR for the exception.');
   lines.push('');
 

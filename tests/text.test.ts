@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { areTitleAndRuleTooSimilar, normalizeComparable } from '../src/text.js';
+import { areTitleAndDecisionTooSimilar, normalizeComparable } from '../src/text.js';
 
 describe('normalizeComparable', () => {
   it('normalizes whitespace and punctuation', () => {
@@ -8,15 +8,15 @@ describe('normalizeComparable', () => {
   });
 });
 
-describe('areTitleAndRuleTooSimilar', () => {
+describe('areTitleAndDecisionTooSimilar', () => {
   it('returns true when effectively identical', () => {
-    expect(areTitleAndRuleTooSimilar('AWSを採用する', 'AWSを採用する')).toBe(true);
-    expect(areTitleAndRuleTooSimilar('AWS を採用する', 'AWSを採用する')).toBe(true);
+    expect(areTitleAndDecisionTooSimilar('AWSを採用する', 'AWSを採用する')).toBe(true);
+    expect(areTitleAndDecisionTooSimilar('AWS を採用する', 'AWSを採用する')).toBe(true);
   });
 
-  it('returns false when rule adds meaningful detail', () => {
+  it('returns false when decision adds meaningful detail', () => {
     expect(
-      areTitleAndRuleTooSimilar('AWSを採用する', '原則として新規本番はAWS。例外は別DRで判断する')
+      areTitleAndDecisionTooSimilar('AWSを採用する', '原則として新規本番はAWS。例外は別DRで判断する')
     ).toBe(false);
   });
 });

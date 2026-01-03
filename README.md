@@ -1,9 +1,17 @@
 # decision-record-generator (dr-gen)
 
-Generate lightweight Decision Records (DRs) from `decision.yaml`.
+For people who get asked later: “Why did we decide this?”
+
+`dr-gen` generates lightweight Decision Records (DRs) from `decision.yaml`.
 Built for fast-moving teams who need a small, reproducible “evidence trail” of decisions (why/decision) for handoffs, audits, and security questionnaires.
 
 日本語は下の「Japanese (日本語)」セクションにまとめています。
+
+## Business plan (paid)
+
+If your organization needs practical templates/guides and invoice-based procurement, see the Business plan:
+
+- https://www.ineeza.com/
 
 **Outputs (4 files)**
 - `decision-record.md` (human-readable)
@@ -31,7 +39,7 @@ supersedes: ""                        # optional: link/id/path of the older DR (
 
 context: ""                           # optional
 why: ""                               # optional
-rule: ""                              # optional (the decision/policy; rendered as "Decision" in decision-record.md)
+decision: ""                          # optional (the decision/policy)
 alternatives: ""                      # optional
 consequences: ""                      # optional
 tags: []                               # optional
@@ -265,7 +273,7 @@ supersedes: ""                           # 任意: 以前のDRのリンク/ID/�
 
 context: ""                              # 任意
 why: ""                                  # 任意
-rule: ""                                 # 任意（決めたこと/方針。decision-record.md では "Decision" として表示）
+decision: ""                              # 任意（決定事項/方針）
 alternatives: ""                         # 任意
 consequences: ""                         # 任意
 tags: []                                  # 任意

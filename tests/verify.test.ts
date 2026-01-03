@@ -12,7 +12,7 @@ describe('verifyOutDir', () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dr-gen-verify-test-'));
     try {
       await generateDecisionRecordFiles(
-        { title: 'Verify OK', why: 'why', rule: 'rule', context: 'ctx' },
+        { title: 'Verify OK', why: 'why', decision: 'decision', context: 'ctx' },
         { outDir: tmpDir }
       );
 
@@ -29,7 +29,7 @@ describe('verifyOutDir', () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dr-gen-verify-test-'));
     try {
       await generateDecisionRecordFiles(
-        { title: 'Verify NG', why: 'why', rule: 'rule', context: 'ctx' },
+        { title: 'Verify NG', why: 'why', decision: 'decision', context: 'ctx' },
         { outDir: tmpDir }
       );
 

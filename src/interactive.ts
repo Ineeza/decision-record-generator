@@ -3,7 +3,7 @@ import process from 'node:process';
 
 import type { DecisionRecord } from './types.js';
 import type { SupportedLang } from './messages.js';
-import { newContextPrompt, newIntroLines, newRulePrompt, newTitlePrompt, newWhyPrompt } from './messages.js';
+import { newContextPrompt, newDecisionPrompt, newIntroLines, newTitlePrompt, newWhyPrompt } from './messages.js';
 
 function todayLocalIsoDate(): string {
   const now = new Date();
@@ -51,10 +51,10 @@ export async function promptDecisionRecord(options: { readonly includeDate: bool
       options.lang
     );
 
-    const rule = requiredNonEmpty(
-      'Rule',
-      'Rule',
-      await rl.question(newRulePrompt(options.lang)),
+    const decision = requiredNonEmpty(
+      'Decision',
+      '決定事項',
+      await rl.question(newDecisionPrompt(options.lang)),
       options.lang
     );
 
@@ -64,7 +64,7 @@ export async function promptDecisionRecord(options: { readonly includeDate: bool
 
     const date = options.includeDate ? todayIsoDate : undefined;
 
-    return { title, date, why, rule, context };
+    return { title, date, why, decision, context };
   } finally {
     rl.close();
   }

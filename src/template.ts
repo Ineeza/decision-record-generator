@@ -7,7 +7,7 @@ export function decisionYamlTemplate(): string {
     'supersedes: ""',
     'context: ""',
     'why: ""',
-    'rule: ""',
+    'decision: ""',
     'alternatives: ""',
     'consequences: ""',
     'tags: []',

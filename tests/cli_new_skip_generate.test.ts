@@ -85,7 +85,7 @@ describe('cli new --skip-generate', () => {
 
       const { stdout, exitCode } = await runCliNewSkipGenerate(
         ['new', '--lang', 'en', '--no-date', '--skip-generate', '--in-dir', inDir, '--out-dir', outDir, '--force'],
-        // Title, Why, Rule, Context
+        // Title, Why, Decision, Context
         ['Choose AWS', 'Because reliability', 'Default to AWS', '']
       );
 

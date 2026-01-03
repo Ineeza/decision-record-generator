@@ -3,7 +3,7 @@ date: "2026-01-01"
 decider: "Head of Product"
 context: "We often do custom quotes, which makes sales, billing, and contracts complicated"
 why: "To make pricing easy to understand for customers and reduce operational friction"
-rule: "New contracts must use monthly subscription pricing by default. Exceptions require CEO approval"
+decision: "New contracts must use monthly subscription pricing by default. Exceptions require CEO approval"
 alternatives: "Usage-based pricing, custom quotes, annual upfront"
 consequences: "We may lose some large enterprise deals short-term, but operations become simpler"
 tags: ["pricing", "sales", "operations"]

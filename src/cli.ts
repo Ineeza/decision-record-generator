@@ -12,7 +12,7 @@ import { decisionFolderName } from './naming.js';
 import { promptDecisionRecord } from './interactive.js';
 import { renderDecisionYaml } from './yaml.js';
 import { verifyOutDir } from './verify.js';
-import { areTitleAndRuleTooSimilar } from './text.js';
+import { areTitleAndDecisionTooSimilar } from './text.js';
 import { listDecisions, renderListReportMarkdown } from './list.js';
 import {
   generatedOutputLines,
@@ -20,7 +20,7 @@ import {
   signatureIgnoredLines,
   skippedGenerateLines,
   templateCreatedLines,
-  titleRuleTooSimilarLines,
+  titleDecisionTooSimilarLines,
   wroteInputLines
 } from './messages.js';
 import type { SupportedLang } from './messages.js';
@@ -96,10 +96,10 @@ async function findAvailableDecisionDirName(baseInDir: string, baseOutDir: strin
   throw new Error('Unable to find available decision directory name.');
 }
 
-function warnIfMissingCoreFields(record: { why?: string; rule?: string }, inputPath: string): void {
+function warnIfMissingCoreFields(record: { why?: string; decision?: string; rule?: string }, inputPath: string): void {
   const missing: string[] = [];
   if ((record.why ?? '').trim().length === 0) missing.push('why');
-  if ((record.rule ?? '').trim().length === 0) missing.push('rule');
+  if (((record.decision ?? record.rule) ?? '').trim().length === 0) missing.push('decision');
 
   if (missing.length > 0) {
     for (const line of missingCoreFieldsLines(inputPath, missing)) {
@@ -108,10 +108,10 @@ function warnIfMissingCoreFields(record: { why?: string; rule?: string }, inputP
   }
 }
 
-function warnIfTitleRuleTooSimilar(record: { title: string; rule?: string }, lang: SupportedLang): void {
-  const rule = record.rule ?? '';
-  if (areTitleAndRuleTooSimilar(record.title, rule)) {
-    for (const line of titleRuleTooSimilarLines(lang)) {
+function warnIfTitleDecisionTooSimilar(record: { title: string; decision?: string; rule?: string }, lang: SupportedLang): void {
+  const decision = record.decision ?? record.rule ?? '';
+  if (areTitleAndDecisionTooSimilar(record.title, decision)) {
+    for (const line of titleDecisionTooSimilarLines(lang)) {
       console.warn(line);
     }
   }
@@ -164,7 +164,7 @@ async function main(argv: readonly string[]): Promise<void> {
 
       const record = await parseDecisionYaml(input);
       warnIfMissingCoreFields(record, input);
-      warnIfTitleRuleTooSimilar(record, resolveLang(undefined));
+      warnIfTitleDecisionTooSimilar(record, resolveLang(undefined));
 
       const baseOutDir = options.outDir;
       const folder = decisionFolderName(record);
@@ -202,7 +202,7 @@ async function main(argv: readonly string[]): Promise<void> {
     .action(async (options: { inDir: string; path: string; outDir: string; force: boolean; date: boolean; lang: string; skipGenerate: boolean }) => {
       const lang = resolveLang(options.lang);
       const record = await promptDecisionRecord({ includeDate: options.date, lang });
-      warnIfTitleRuleTooSimilar(record, lang);
+      warnIfTitleDecisionTooSimilar(record, lang);
 
       const desiredFolder = decisionFolderName(record);
       const decisionDirName = await findAvailableDecisionDirName(options.inDir, options.outDir, desiredFolder);

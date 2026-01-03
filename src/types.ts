@@ -6,6 +6,8 @@ export interface DecisionRecord {
   readonly supersedes?: string;
   readonly context?: string;
   readonly why?: string;
+  readonly decision?: string;
+  /** @deprecated Legacy key. Prefer `decision`. Still accepted for backward compatibility. */
   readonly rule?: string;
   readonly alternatives?: string;
   readonly consequences?: string;

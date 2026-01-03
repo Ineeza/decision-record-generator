@@ -11,7 +11,7 @@ export function renderDecisionYaml(record: DecisionRecord): string {
     supersedes: record.supersedes ?? '',
     context: record.context ?? '',
     why: record.why ?? '',
-    rule: record.rule ?? '',
+    decision: record.decision ?? record.rule ?? '',
     alternatives: record.alternatives ?? '',
     consequences: record.consequences ?? '',
     tags: record.tags ?? []
