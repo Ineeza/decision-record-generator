@@ -44,17 +44,17 @@ export async function promptDecisionRecord(options: { readonly includeDate: bool
       options.lang
     );
 
-    const why = requiredNonEmpty(
-      'Why',
-      'Why',
-      await rl.question(newWhyPrompt(options.lang)),
-      options.lang
-    );
-
     const decision = requiredNonEmpty(
       'Decision',
       '決定事項',
       await rl.question(newDecisionPrompt(options.lang)),
+      options.lang
+    );
+
+    const why = requiredNonEmpty(
+      'Why',
+      'Why',
+      await rl.question(newWhyPrompt(options.lang)),
       options.lang
     );
 

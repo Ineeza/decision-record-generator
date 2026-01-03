@@ -73,74 +73,79 @@ export function newIntroLines(
 ): readonly string[] {
   const lines: string[] = [];
   if (lang === 'ja') {
-    lines.push('いくつか質問します。短い回答でOKです。');
-    lines.push('コツ: 理由（Why）と決定事項（Decision）に集中してください。');
+    lines.push('いくつか質問します（全4問）。短く答えればOKです。');
+    lines.push('ポイント: Decision=決定事項、Why=目的/狙い、Context=現状/制約（事実）と分けると、後から読み返しやすくなります。');
   } else {
-    lines.push('Answer a few questions. Short answers are OK.');
-    lines.push('Tip: Focus on the reason (Why) and the decision (Decision).');
+    lines.push('Answer a few questions (4 total). Short answers are fine.');
+    lines.push('Tip: Separate Decision (what), Why (goal), and Context (facts/constraints) for clarity.');
   }
   if (options.includeDate) {
     if (lang === 'ja') {
-      lines.push(`日付は本日（${options.todayIsoDate}）に設定します。無効にするには --no-date を使ってください。`);
+      lines.push(`日付は本日（${options.todayIsoDate}）を入れます。不要なら --no-date を使ってください。`);
     } else {
       lines.push(`Date will be set to today (${options.todayIsoDate}). Use --no-date to disable.`);
     }
   }
+  lines.push('');
   return lines;
 }
 
 export function newTitlePrompt(lang: SupportedLang = 'en'): string {
   if (lang === 'ja') {
-    return `タイトル（必須）
-何を決めましたか？（短い見出し・名詞句でもOK）
-例: 「定例会議の上限を30分にする」 / 「初動返信SLAを24時間以内にする」
+    return `\n[1/4] タイトル（必須）
+短い見出し（要約）を書いてください
+例: 「定例会議の上限を30分にする」
 > `;
   }
 
-  return `Title (required)
-What did you decide? (one sentence)
-Examples: "Limit recurring meetings to 30 minutes" / "Set support reply time to within 24 hours"
+  return `\n[1/4] Title (required)
+Short headline / summary
+Example: "Limit recurring meetings to 30 minutes"
 > `;
 }
 
 export function newWhyPrompt(lang: SupportedLang = 'en'): string {
   if (lang === 'ja') {
-    return `Why（必須）
-この決定をした理由・目的（なぜやるのか？）
-例: 「セキュリティ事故を防ぐ」 / 「請求をシンプルにする」 / 「長い会議を減らす」
+    return `\n[3/4] 理由（Why）（必須）
+目的・狙い（何を達成したい？）
+※ 現状や制約などの“事実”は次の Context に書くのがおすすめ
+例: 「集中できる時間を増やし、長い会議による生産性低下を防ぐ」
 > `;
   }
 
-  return `Why (required)
-Reason / goal behind the decision (why are we doing this?).
-Examples: "Reduce security risk" / "Make billing simpler" / "Avoid long meetings"
+  return `\n[3/4] Why (required)
+Goal / intended outcome (what are you trying to achieve?).
+Tip: Put facts/constraints in Context.
+Example: "Increase focused work time and reduce productivity loss from long meetings"
 > `;
 }
 
 export function newDecisionPrompt(lang: SupportedLang = 'en'): string {
   if (lang === 'ja') {
-    return `Decision（必須）
-今回の決定事項は何ですか？（方針・ルール・当面の優先順位など。行動・条件・例外まで書けると良い）
-例: 「優先開発は list と new --skip-generate。他は後回しにする」
+    return `\n[2/4] 決定事項（Decision）（必須）
+何を、どうする？（方針・ルール・当面の優先順位など。行動・条件・例外まで書けると良い）
+例: 「定例会議は原則30分。延長する場合は事前に目的とアジェンダを共有する」
 > `;
   }
 
-  return `Decision (required)
+  return `\n[2/4] Decision (required)
 What did you decide? (policy/priority; actions are OK)
-Examples: "Prioritize list + --skip-generate first; defer others" / "Default to AWS for new production"
+Example: "Default recurring meetings to 30 minutes; share agenda in advance if you need more time"
 > `;
 }
 
 export function newContextPrompt(lang: SupportedLang = 'en'): string {
   if (lang === 'ja') {
-    return `Context（任意）
-背景・制約（空欄でもOK）
-例: 「返信が遅いという声が増えた」 / 「スプレッドシートでパスワード共有していた」
+    return `\n[4/4] 現状・制約（Context）（任意）
+いまの状況 / 制約 / 前提などの“事実”（空欄でもOK）
+※ 目的・狙いは Why に書くのがおすすめ
+例: 「定例会議が長引きがちで、集中作業の時間が確保しづらい」
 > `;
   }
 
-  return `Context (optional)
-Background / constraints (you can leave this empty).
-Examples: "Customers say replies are slow" / "We used to share passwords in a spreadsheet"
+  return `\n[4/4] Context (optional)
+Current situation / constraints / assumptions (facts). You can leave this empty.
+Tip: Put goals in Why.
+Example: "Recurring meetings often run long and it’s hard to secure focused work time"
 > `;
 }
